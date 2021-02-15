@@ -48,4 +48,3 @@ sudo apt-mark hold kubelet kubeadm kubectl
 
 
 echo "alias k=kubectl" >> .profile
-source .profile

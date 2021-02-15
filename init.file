@@ -1,0 +1,4 @@
+#!/bin/bash
+
+echo "qweasd" > /root/file.txt
+echo "normal" > /home/ubuntu/file.txt
