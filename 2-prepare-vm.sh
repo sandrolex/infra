@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
 br_netfilter
 EOF
@@ -34,6 +33,12 @@ sudo mkdir -p /etc/containerd
 containerd config default | sudo tee /etc/containerd/config.toml
 
 sudo systemctl restart containerd
+
+
+# network-manager
+#sudo apt-get install -y network-manager
+#echo "[keyfile]" >> /etc/NetworkManager/conf.d/calico.conf
+#echo "unmanaged-devices=interface-name:cali*;interface-name:tunl*;interface-name:vxlan.calico" >> /etc/NetworkManager/conf.d/calico.conf
 
 
 # kubeadm
