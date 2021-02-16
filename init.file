@@ -2,3 +2,6 @@
 
 echo "qweasd" > /root/file.txt
 echo "normal" > /home/ubuntu/file.txt
+
+apt-get update -y
+apt-get install -y apache2
