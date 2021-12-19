@@ -1,0 +1,80 @@
+https://phoenixnap.com/kb/install-kubernetes-on-ubuntu
+
+
+https://stackoverflow.com/questions/67606941/kubeadm-init-failing-while-initializing-a-kubernetes-cluster
+
+
+https://jhooq.com/14-steps-to-install-kubernetes-on-ubuntu-18-04-and-16-04/
+
+
+
+kubeadm join 192.168.1.192:6443 --token mbzjgu.2wfk6hmpchawja7z \
+        --discovery-token-ca-cert-hash sha256:826290f55cadfa3d84fa14ac10cb2188833b3e3740695caee6340cc7fd1eb533
+
+
+
+
+
+## WORKER
+apt-get update -y
+apt-get install docker.io -y
+systemctl enable docker
+systemctl start docker
+
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add
+apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+apt-get install kubeadm kubelet kubectl -y
+apt-mark hold kubeadm kubelet kubectl
+swapoff -a
+ufw disable
+
+cat > /etc/docker/daemon.json <<EOF
+{
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m"
+  },
+  "storage-driver": "overlay2"
+}
+EOF
+
+systemctl daemon-reload
+systemctl restart docker
+
+
+iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
+
+systemctl start kubelet
+
+# master
+vim /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+Environment="KUBELET_EXTRA_ARGS=--node-ip=
+systemctl daemon-reload
+systemctl restart kubelet
+
+
+
+hostnamectl set-hostname master
+kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=192.168.1.192
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+kubectl get pods --all-namespaces
+
+# workers
+hostnamectl set-hostname workerxx
+
+kubeadm join 192.168.1.192:6443 --token 7hxdrx.mp8h74wd8m9gsmd1 \
+        --discovery-token-ca-cert-hash sha256:fed8c75510c2b9954476648f92b7630f9035a1515db835d003409065a365fd7a
+
+https://medium.com/@joatmon08/playing-with-kubeadm-in-vagrant-machines-part-2-bac431095706
+
+
+
+kubectl get nodes worker1 -o json | jq .status.addresses
