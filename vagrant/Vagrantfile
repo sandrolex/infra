@@ -11,7 +11,6 @@ Vagrant.configure("2") do |config|
       v.memory = 4096 
       v.cpus = 2
     end
-    master.vm.provision "shell", path: "master.sh"
   end
 
 
@@ -22,18 +21,6 @@ Vagrant.configure("2") do |config|
     worker2.vm.hostname = "worker2"
     worker2.vm.provider "virtualbox" do |v|
       v.name = "worker2"
-      v.memory = 1024
-      v.cpus = 1
-    end
-  end
-
-  config.vm.define "worker3" do |worker3|
-    worker3.vm.box_download_insecure = true
-    worker3.vm.box = "bento/ubuntu-20.04"        
-    worker3.vm.network "public_network", ip: "192.168.1.196", bridge: "eno1"
-    worker3.vm.hostname = "worker3"
-    worker3.vm.provider "virtualbox" do |v|
-      v.name = "worker3"
       v.memory = 1024
       v.cpus = 1
     end
