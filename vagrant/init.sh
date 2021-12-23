@@ -1,7 +1,7 @@
 #!/bin/bash 
 
 apt-get update -y
-apt-get install docker.io -y
+apt-get install docker.io jq -y
 systemctl enable docker
 systemctl start docker
 
