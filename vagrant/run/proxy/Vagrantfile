@@ -1,0 +1,17 @@
+Vagrant.configure("2") do |config|
+  config.vm.provision "shell", path: "../../proxy.sh"
+
+  config.vm.define "proxy" do |proxy|
+    proxy.vm.box_download_insecure = true
+    proxy.vm.box = "bento/ubuntu-20.04"        
+    proxy.vm.network "public_network", ip: "192.168.1.200", bridge: "eno1"
+    proxy.vm.hostname = "proxy"
+    proxy.vm.provider "virtualbox" do |v|
+      v.name = "proxy"
+      v.memory = 1024
+      v.cpus = 1
+    end
+  end
+
+
+end
