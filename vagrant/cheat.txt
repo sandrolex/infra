@@ -126,3 +126,15 @@ ps -ef | grep  /usr/lib/virtualbox/VBoxHeadless
 ```
 
 kill entry with ```kill -9 id``` then unregister
+
+
+
+# NFS
+
+https://www.tecmint.com/install-nfs-server-on-ubuntu/
+
+# Mongo with pvc
+
+https://devopscube.com/deploy-mongodb-kubernetes/
+
+
