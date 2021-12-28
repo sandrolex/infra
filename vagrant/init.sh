@@ -31,6 +31,9 @@ iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
 
 systemctl start kubelet
 
+echo "Preparing kubelet"
+sleep 10
+
 cat > /etc/systemd/system/kubelet.service.d/10-kubeadm.conf <<EOF
 # with kubeadm and kubelet v1.11+
 [Service]
@@ -45,7 +48,3 @@ EnvironmentFile=-/etc/default/kubelet
 ExecStart=
 ExecStart=/usr/bin/kubelet $KUBELET_KUBECONFIG_ARGS $KUBELET_CONFIG_ARGS $KUBELET_KUBEADM_ARGS $KUBELET_EXTRA_ARGS
 EOF
-
-systemctl daemon-reload
-systemctl restart kubelet
-
