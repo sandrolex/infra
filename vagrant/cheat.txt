@@ -105,8 +105,24 @@ kubeadm join 192.168.1.192:6443 --token wk11ml.s8ldiv8iao4iu5wi \
         --discovery-token-ca-cert-hash sha256:e542b47d8a48c13139949c0f85591646b776542dd903e90a006e8dddcb49ea87
 
 
-
-
 kubectl get nodes worker1 -o json | jq .status.addresses
 
 
+
+## Vbox destroy vms
+List all vms
+```
+VBoxManage list vms
+```
+
+then destroy 
+```
+VBoxManage unregistervm --delete 8944418d-418a-4bac-a8e1-353633affa6c
+```
+
+If destroy don't work, 
+```
+ps -ef | grep  /usr/lib/virtualbox/VBoxHeadless
+```
+
+kill entry with ```kill -9 id``` then unregister
