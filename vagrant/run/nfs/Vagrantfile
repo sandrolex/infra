@@ -1,0 +1,17 @@
+Vagrant.configure("2") do |config|
+  config.vm.provision "shell", path: "../../nfs.sh"
+
+  config.vm.define "mothership" do |mothership|
+    mothership.vm.box_download_insecure = true
+    mothership.vm.box = "bento/ubuntu-20.04"        
+    mothership.vm.network "public_network", ip: "192.168.1.200", bridge: "eno1"
+    mothership.vm.hostname = "mothership"
+    mothership.vm.provider "virtualbox" do |v|
+      v.name = "mothership"
+      v.memory = 1024
+      v.cpus = 1
+    end
+  end
+
+
+end

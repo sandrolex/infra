@@ -1,3 +1,6 @@
+## Local k8s cluster with vagrant
+
+## Ref docs
 https://phoenixnap.com/kb/install-kubernetes-on-ubuntu
 
 
@@ -6,16 +9,16 @@ https://stackoverflow.com/questions/67606941/kubeadm-init-failing-while-initiali
 
 https://jhooq.com/14-steps-to-install-kubernetes-on-ubuntu-18-04-and-16-04/
 
+https://stackoverflow.com/questions/47845739/configuring-flannel-to-use-a-non-default-interface-in-kubernetes
+
+https://medium.com/@joatmon08/playing-with-kubeadm-in-vagrant-machines-part-2-bac431095706
+
+Calico + flannel 
+https://projectcalico.docs.tigera.io/getting-started/kubernetes/flannel/flannel
 
 
-kubeadm join 192.168.1.192:6443 --token mbzjgu.2wfk6hmpchawja7z \
-        --discovery-token-ca-cert-hash sha256:826290f55cadfa3d84fa14ac10cb2188833b3e3740695caee6340cc7fd1eb533
-
-
-
-
-
-## WORKER
+## Preparing nodes
+```bash
 apt-get update -y
 apt-get install docker.io -y
 systemctl enable docker
@@ -46,35 +49,64 @@ systemctl restart docker
 iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
 
 systemctl start kubelet
+```
 
-# master
+## Only on master
+```bash
+# config kubelet for using eth1 ip
 vim /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-Environment="KUBELET_EXTRA_ARGS=--node-ip=
-systemctl daemon-reload
-systemctl restart kubelet
+Environment="KUBELET_EXTRA_ARGS=--kubelet.resolv-conf=/run/systemd/resolve/resolv.conf  --node-ip="
 
+--kubelet.resolv-conf=/run/systemd/resolve/resolv.conf 
 
+  systemctl daemon-reload
+  systemctl restart kubelet
 
-hostnamectl set-hostname master
+# init kubenernets (not CNI yet)
 kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=192.168.1.192
 
+# config kubectl
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
+# install flannel CNI
+wget  https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 
-kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+# edit the deployment manifest, set the interface to eth1
+containers:
+  - name: kube-flannel
+    image: quay.io/coreos/flannel:v0.10.0-amd64
+    command:
+    - /opt/bin/flanneld
+    args:
+    - --ip-masq
+    - --kube-subnet-mgr
+    - --iface=eth1
+```
 
+Observe until all nodes are Ready
+
+```bash
 kubectl get pods --all-namespaces
+```
+
+Copy the join command, or later run:
+```bash
+kubeadm token create --print-join-command
+```
+
+
 
 # workers
 hostnamectl set-hostname workerxx
 
-kubeadm join 192.168.1.192:6443 --token 7hxdrx.mp8h74wd8m9gsmd1 \
-        --discovery-token-ca-cert-hash sha256:fed8c75510c2b9954476648f92b7630f9035a1515db835d003409065a365fd7a
+kubeadm join 192.168.1.192:6443 --token wk11ml.s8ldiv8iao4iu5wi \
+        --discovery-token-ca-cert-hash sha256:e542b47d8a48c13139949c0f85591646b776542dd903e90a006e8dddcb49ea87
 
-https://medium.com/@joatmon08/playing-with-kubeadm-in-vagrant-machines-part-2-bac431095706
 
 
 
 kubectl get nodes worker1 -o json | jq .status.addresses
+
+
