@@ -1,0 +1,18 @@
+Vagrant.configure("2") do |config|
+  config.vm.provision "shell", path: "../../init.sh"
+  config.vm.provision "shell", path: "worker3.sh"
+
+  config.vm.define "worker3" do |worker3|
+    worker3.vm.box_download_insecure = true
+    worker3.vm.box = "bento/ubuntu-20.04"        
+    worker3.vm.network "public_network", ip: "192.168.1.198", bridge: "eno1"
+    worker3.vm.hostname = "worker3"
+    worker3.vm.provider "virtualbox" do |v|
+      v.name = "worker3"
+      v.memory = 3060 
+      v.cpus = 1 
+    end
+  end
+
+
+end
