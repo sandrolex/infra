@@ -1,2 +1,7 @@
 .vagrant
 .dccache
+**/.terraform/*
+**/.terraform.lock.hcl
+v2/deploy/terrafom/.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
