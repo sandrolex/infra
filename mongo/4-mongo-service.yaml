@@ -4,7 +4,7 @@ metadata:
   namespace: mongo
   labels:
     app: mongo
-  name: mongo-svc
+  name: mongo
 spec:
   ports:
   - port: 27017

@@ -129,8 +129,8 @@ resource "kubernetes_secret" "mongo-secret" {
   }
 
   data = {
-    "password" = "c3VwZXJwYXNzd29yZA=="
-    "username" = "YWRtaW51c2Vy"
+    "username" = "superadminuser"
+    "password" = "superadminpassword"
   }
 
   type = "Opaque"
