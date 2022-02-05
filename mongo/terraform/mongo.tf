@@ -35,12 +35,39 @@ variable "mongo_port" {
     type = number
 }
 
+variable "registry_server" {
+  type = string
+}
+
+variable "registry_username" {
+  type = string
+}
+
+variable "registry_password" {
+  type = string
+}
+
+
 provider "kubernetes" {
   host = var.host
 
   client_certificate     = base64decode(var.client_certificate)
   client_key             = base64decode(var.client_key)
   cluster_ca_certificate = base64decode(var.cluster_ca_certificate)
+}
+
+
+resource "kubernetes_secret" "regcred" {
+  metadata {
+    name = "regcred"
+    namespace = var.prj_name
+  }
+
+  data = {
+    ".dockerconfigjson" = "${file("${path.module}/conf/registry/config.json")}"
+  }
+
+  type = "kubernetes.io/dockerconfigjson"
 }
 
 
@@ -159,8 +186,11 @@ resource "kubernetes_deployment" "mongo-deployment" {
         }
       }
       spec {
+        image_pull_secrets {
+          name = "regcred"
+        }
         container {
-          image = "mongo"
+          image = format("%s/mongo:latest", var.registry_server)
           name  = var.prj_name
           readiness_probe {
             exec {
@@ -224,4 +254,35 @@ resource "kubernetes_deployment" "mongo-deployment" {
       }
     }
   } 
+}
+
+resource "kubernetes_network_policy" "mongo-netpol" {
+  metadata {
+    name      = var.prj_name
+    namespace = var.prj_name
+  }
+
+  spec {
+    pod_selector {}
+    ingress {
+      ports {
+        port = "27017"
+        protocol = "TCP"
+      }
+      from {
+        namespace_selector {
+          match_labels = {
+            "kubernetes.io/metadata.name" = "viper"
+          } 
+        }
+        pod_selector {
+          match_labels = {
+            mongo = "true"
+          }
+        }
+      }
+    }
+
+    policy_types = ["Ingress", "Egress"]
+  }
 }

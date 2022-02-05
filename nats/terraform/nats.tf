@@ -6,6 +6,9 @@ terraform {
   }
 }
 
+variable "registry_server" {
+  type = string
+}
 
 variable "host" {
   type = string
@@ -49,6 +52,20 @@ resource "kubernetes_namespace" "nats" {
         name = var.prj_name
   }
 }
+
+resource "kubernetes_secret" "regcred" {
+  metadata {
+    name = "regcred"
+    namespace = var.prj_name
+  }
+
+  data = {
+    ".dockerconfigjson" = "${file("${path.module}/conf/registry/config.json")}"
+  }
+
+  type = "kubernetes.io/dockerconfigjson"
+}
+
 
 resource "kubernetes_service" "nats-svc" {
   metadata {
@@ -103,8 +120,11 @@ resource "kubernetes_deployment" "nats-deployment" {
         }
       }
       spec {
+        image_pull_secrets {
+          name = "regcred"
+        }
         container {
-          image = "nats:alpine3.10"
+          image = format("%s/nats:alpine3.10", var.registry_server)
           name  = var.prj_name
         }  
       }
@@ -112,3 +132,39 @@ resource "kubernetes_deployment" "nats-deployment" {
   } 
 }
 
+
+resource "kubernetes_network_policy" "nats-netpol" {
+  metadata {
+    name      = var.prj_name
+    namespace = var.prj_name
+  }
+
+  spec {
+    pod_selector {}
+    
+    ingress {
+      ports {
+        port = var.nats_port1
+        protocol = "TCP"
+      }
+      ports {
+        port     = var.nats_port2
+        protocol = "TCP"
+      }
+      from {
+        namespace_selector {
+          match_labels = {
+            "kubernetes.io/metadata.name" = "viper"
+          } 
+        }
+        pod_selector {
+          match_labels = {
+            nats = "true"
+          }
+        }
+      }
+    }
+
+    policy_types = ["Ingress", "Egress"]
+  }
+}
