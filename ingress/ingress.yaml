@@ -1,0 +1,43 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: minimal-ingress
+  namespace: viper
+  annotations:
+    # nginx.org/proxy-connect-timeout: "30s"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    # nginx.ingress.kubernetes.io/secure-backends: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    # nginx.org/redirect-to-https: "true"
+    # ingress.kubernetes.io/ssl-redirect: "false"
+    # nginx.ingress.kubernetes.io/ssl-services: "api"
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - path: /api(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: api
+            port:
+              number: 443
+  - http:
+      paths:
+      - path: /front(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: front
+            port:
+              number: 443
+  - http:
+      paths:
+      - path: /pub(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: pub
+            port:
+              number: 443
