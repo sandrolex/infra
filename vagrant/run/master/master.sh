@@ -25,5 +25,11 @@ curl -L --remote-name-all https://github.com/cilium/cilium-cli/releases/latest/d
 sudo tar xzvfC cilium-linux-amd64.tar.gz /usr/local/bin
 #rm cilium-linux-amd64.tar.gz{,.sha256sum}
 
+# get calico manifest
+curl https://projectcalico.docs.tigera.io/manifests/calico.yaml -O
+
+# get flannel 
+wget  https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
 
 
