@@ -6,7 +6,7 @@ apt -y install curl apt-transport-https
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list
 
-apt update
+apt update -y 
 apt -y install vim git curl wget kubelet kubeadm kubectl
 apt-mark hold kubelet kubeadm kubectl
 
@@ -52,7 +52,7 @@ apt install -y curl gnupg2 software-properties-common apt-transport-https ca-cer
 
 # Add Docker repo
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+add-apt-repository -y "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 
 # Install containerd
 apt update
@@ -69,8 +69,13 @@ systemctl enable containerd
 
 systemctl enable kubelet
 
-kubeadm init
+# Master
+# kubeadm init
 
-mkdir -p $HOME/.kube
-cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-chown $(id -u):$(id -g) $HOME/.kube/config
+# mkdir -p $HOME/.kube
+# cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+# chown $(id -u):$(id -g) $HOME/.kube/config
+
+
+# kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
